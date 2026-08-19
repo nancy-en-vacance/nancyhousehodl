@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Домашние дела</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f1e9;
+    --bg2:#efe7da;
+    --card:#fffdf9;
+    --ink:#3f382f;
+    --muted:#938a7b;
+    --line:#e7ddcd;
+    --accent:#7c9473;      /* мягкий шалфейный */
+    --accent-ink:#4f6549;
+    --due:#c9803f;          /* тёплый терракот — «пора» */
+    --due-bg:#fbeede;
+    --done:#7c9473;
+    --shadow:0 6px 20px rgba(88,74,52,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    background:linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:env(safe-area-inset-top) 0 40px;
+  }
+  /* домашние мотивы на фоне (веник, хлеб, чашка, утюг) */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiB2aWV3Qm94PSIwIDAgMjYwIDI2MCI+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWM4Zjc4IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgb3BhY2l0eT0iMC45Ij4KICAgIDwhLS0g0LLQtdC90LjQuiAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMwLDI4KSByb3RhdGUoLTgpIj4KICAgICAgPGxpbmUgeDE9IjI0IiB5MT0iMCIgeDI9IjgiIHkyPSIzNCIvPgogICAgICA8cGF0aCBkPSJNMCAzNCBMMTggMzQgTDIzIDU0IEwtNSA1NCBaIi8+CiAgICAgIDxsaW5lIHgxPSIyIiB5MT0iMzgiIHgyPSIwIiB5Mj0iNTIiLz4KICAgICAgPGxpbmUgeDE9IjkiIHkxPSIzNyIgeDI9IjkiIHkyPSI1MyIvPgogICAgICA8bGluZSB4MT0iMTYiIHkxPSIzOCIgeDI9IjE4IiB5Mj0iNTIiLz4KICAgIDwvZz4KICAgIDwhLS0g0YXQu9C10LEgLS0+CiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjAsMzQpIHJvdGF0ZSg2KSI+CiAgICAgIDxwYXRoIGQ9Ik0wIDMwIEMwIDEyIDEyIDUgMjYgNSBDNDAgNSA1MiAxMiA1MiAzMCBaIi8+CiAgICAgIDxsaW5lIHgxPSIwIiB5MT0iMzAiIHgyPSI1MiIgeTI9IjMwIi8+CiAgICAgIDxsaW5lIHgxPSIxNiIgeTE9IjE2IiB4Mj0iMjEiIHkyPSI5Ii8+CiAgICAgIDxsaW5lIHgxPSIyOCIgeTE9IjE1IiB4Mj0iMzMiIHkyPSI4Ii8+CiAgICA8L2c+CiAgICA8IS0tINGH0LDRiNC60LAgLS0+CiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0MCwxNTgpIHJvdGF0ZSgtNCkiPgogICAgICA8cGF0aCBkPSJNMCA0IEwzMCA0IEwzMCAxNCBBMTUgOSAwIDAgMSAwIDE0IFoiLz4KICAgICAgPHBhdGggZD0iTTMwIDYgQTggNyAwIDAgMSAzMCAyMCIvPgogICAgICA8bGluZSB4MT0iLTQiIHkxPSIyNiIgeDI9IjM2IiB5Mj0iMjYiLz4KICAgICAgPHBhdGggZD0iTTEwIC02IEM2IC0xMCAxNCAtMTIgMTAgLTE4IiBvcGFjaXR5PSIwLjciLz4KICAgIDwvZz4KICAgIDwhLS0g0YPRgtGO0LMgLS0+CiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjAsMTY4KSByb3RhdGUoNykiPgogICAgICA8cGF0aCBkPSJNMiAzMCBDMTYgMjAgNDAgMjAgNTIgMjcgTDQ3IDM2IEw3IDM2IFoiLz4KICAgICAgPHBhdGggZD0iTTEyIDIyIEMxOCAxMiAzNCAxMiA0MiAyMCIvPgogICAgICA8bGluZSB4MT0iMjAiIHkxPSIzMCIgeDI9IjQwIiB5Mj0iMzAiLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPgo=");
+    background-size:260px 260px;
+    opacity:.42;
+  }
+  .wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:22px 16px 0}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
+  header.top h1{
+    font-family:'Jost','Century Gothic','Futura','Segoe UI',sans-serif;
+    font-size:30px;font-weight:600;margin:0;letter-spacing:.4px;color:var(--accent-ink);
+  }
+  header.top .date{color:var(--muted);font-size:14px;white-space:nowrap}
+
+  .banner{
+    background:#fff6e5;border:1px solid #f0dcae;border-radius:14px;
+    padding:14px 16px;margin-bottom:18px;font-size:14px;line-height:1.5;color:#7a6428;
+  }
+  .banner b{color:#5f4e1f}
+  .banner code{background:#fbecc9;padding:1px 6px;border-radius:6px;font-size:13px}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:6px 6px;margin-bottom:16px;overflow:hidden;
+  }
+  .card > h2{
+    font-size:14px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:14px 14px 8px;font-weight:700;
+  }
+
+  .today{
+    background:linear-gradient(180deg,#fffaf1,#fdf3e2);
+    border-color:#f0e2c9;
+  }
+  .today h2{color:var(--due)}
+  .today .empty{padding:6px 14px 16px;color:var(--accent-ink);font-size:15px}
+  .today .empty b{color:var(--done)}
+
+  .row{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 14px;border-radius:14px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;user-select:none;
+    transition:background .15s;
+  }
+  .row:hover{background:#faf5ec}
+  .row + .row{border-top:1px solid var(--line)}
+  .row .box{
+    flex:0 0 auto;width:26px;height:26px;border-radius:9px;border:2px solid #cdbfa6;
+    display:grid;place-items:center;transition:all .15s;background:#fff;
+  }
+  .row.done .box{background:var(--done);border-color:var(--done)}
+  .row .box svg{width:15px;height:15px;stroke:#fff;stroke-width:3;fill:none;
+    opacity:0;transform:scale(.6);transition:.15s}
+  .row.done .box svg{opacity:1;transform:scale(1)}
+  .row .body{flex:1;min-width:0}
+  .row .name{font-size:16.5px;font-weight:600;line-height:1.25}
+  .row.done .name{color:var(--muted)}
+  .row .sub{font-size:13px;color:var(--muted);margin-top:2px}
+  .row.is-due .sub{color:var(--due);font-weight:600}
+  .row .flag{
+    flex:0 0 auto;font-size:12px;font-weight:700;color:var(--due);
+    background:var(--due-bg);padding:4px 9px;border-radius:20px;
+  }
+
+  .todo-item{display:flex;align-items:center;gap:12px;padding:12px 14px}
+  .todo-item + .todo-item{border-top:1px solid var(--line)}
+  .todo-item .body{flex:1;min-width:0}
+  .todo-item .name{font-weight:600;font-size:16px}
+  .todo-item .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .btn-done{
+    flex:0 0 auto;border:none;background:var(--accent);color:#fff;font-weight:700;
+    font-size:14px;padding:9px 15px;border-radius:12px;cursor:pointer;
+  }
+  .btn-done:active{transform:translateY(1px)}
+
+  .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:2px 2px 14px}
+  .toolbar .refresh{
+    border:1px solid var(--line);background:var(--card);color:var(--muted);
+    font-size:13px;padding:8px 14px;border-radius:12px;cursor:pointer;
+  }
+  .toolbar .refresh:active{transform:translateY(1px)}
+
+  details.history{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden}
+  details.history > summary{
+    list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;font-size:15px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  details.history > summary::-webkit-details-marker{display:none}
+  details.history > summary .chev{color:var(--muted);transition:transform .2s}
+  details.history[open] > summary .chev{transform:rotate(180deg)}
+  .hist-controls{padding:0 18px 10px}
+  .hist-controls select{
+    width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+    background:#fff;font-size:14px;color:var(--ink);
+  }
+  .hist-day{padding:6px 18px 4px}
+  .hist-day .d{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+    margin:12px 0 4px;font-weight:700}
+  .hist-entry{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+  .hist-entry .t{color:var(--muted);flex:0 0 46px;font-variant-numeric:tabular-nums}
+  .hist-entry .n{flex:1}
+  .hist-entry .c{color:var(--muted);font-size:12px}
+  .hist-empty{padding:4px 18px 18px;color:var(--muted);font-size:14px}
+
+  footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:22px;line-height:1.6}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:#3f382f;color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;
+    opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .loading{opacity:.55;pointer-events:none}
+  .spinner{display:inline-block;width:15px;height:15px;border:2px solid #cdbfa6;
+    border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .center-msg{text-align:center;color:var(--muted);padding:40px 10px;font-size:15px}
+
+  /* недельная история */
+  .week-card > h2{margin:14px 14px 4px}
+  .week-head{display:flex;align-items:center;justify-content:space-between;padding:2px 12px 10px;gap:8px}
+  .week-title{font-weight:700;font-size:15px;color:var(--ink)}
+  .wnav{border:1px solid var(--line);background:#fff;color:var(--accent-ink);width:34px;height:34px;
+    border-radius:11px;font-size:18px;cursor:pointer;line-height:1;flex:0 0 auto}
+  .wnav:active{transform:translateY(1px)}
+  .wnav.dis{opacity:.3;display:inline-grid;place-items:center}
+  .wgrid{display:grid;gap:4px;padding:0 10px 4px}
+  .wday{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5px 0;border-radius:10px;cursor:pointer}
+  .wday .wdow{font-size:11px;color:var(--muted);font-weight:700}
+  .wday .wnum{font-size:14px;color:var(--ink);font-weight:600}
+  .wday.today{background:var(--due-bg)}
+  .wday.today .wnum{color:var(--due)}
+  .wlabel{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink);
+    cursor:pointer;padding-right:2px;min-width:0}
+  .wlabel .wico{font-size:15px;flex:0 0 auto}
+  .wlabel span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wcell{display:grid;place-items:center;min-height:36px;border-radius:10px;background:#f2ece0;cursor:pointer}
+  .wcell.has{background:#e6efe0}
+  .wcell.today{box-shadow:inset 0 0 0 2px var(--due-bg)}
+  .wcheck{color:var(--done);font-weight:800;font-size:16px}
+  .wcount{color:#41623a;font-weight:800;font-size:13px;background:#d3e3c9;width:22px;height:22px;border-radius:50%;display:grid;place-items:center}
+  .week-hint{color:var(--muted);font-size:12px;padding:6px 14px 12px;line-height:1.45}
+
+  /* модальный отчёт */
+  .modal-overlay{position:fixed;inset:0;background:rgba(63,56,47,.42);display:none;
+    align-items:flex-end;justify-content:center;z-index:60}
+  .modal-overlay.show{display:flex}
+  .modal-card{background:var(--card);width:100%;max-width:620px;max-height:84vh;
+    border-radius:22px 22px 0 0;overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 -10px 40px rgba(0,0,0,.18)}
+  @media(min-width:640px){.modal-overlay{align-items:center}.modal-card{border-radius:22px}}
+  .modal-top{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 18px 10px;gap:10px}
+  .modal-title{font-weight:700;font-size:17px;line-height:1.3}
+  .modal-close{border:none;background:#f0e9dc;color:var(--muted);width:34px;height:34px;
+    border-radius:11px;font-size:15px;cursor:pointer;flex:0 0 auto}
+  .modal-body{overflow:auto;padding:0 18px 26px}
+  .rep-list{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+  .rep-row{padding:12px 14px}
+  .rep-row + .rep-row{border-top:1px solid var(--line)}
+  .rep-name{font-weight:600;font-size:15.5px}
+  .rep-meta{display:flex;justify-content:space-between;gap:10px;margin-top:3px;font-size:13px;color:var(--muted)}
+  .rep-badge{background:#eef3e9;color:var(--accent-ink);padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+  .rep-heading{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;margin:8px 2px 6px}
+  .rep-rentry{display:flex;gap:10px;padding:8px 2px;border-top:1px solid var(--line);font-size:14px}
+  .rep-rentry:first-child{border-top:none}
+  .rep-rentry .t{color:var(--muted);flex:0 0 96px;font-variant-numeric:tabular-nums}
+  .rep-empty{color:var(--muted);padding:14px 2px;font-size:14.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Домашние дела</h1>
+    <div class="date" id="today"></div>
+  </header>
+
+  <div id="setup" class="banner" style="display:none">
+    <b>Почти готово.</b> Осталось вставить ссылку на скрипт Google. Откройте этот файл
+    и в строке <code>const API_URL = ""</code> впишите адрес веб-приложения из инструкции.
+  </div>
+
+  <div class="toolbar">
+    <span id="status-line" style="color:var(--muted);font-size:13px">&nbsp;</span>
+    <button class="refresh" id="refresh">Обновить</button>
+  </div>
+
+  <div id="app"><div class="center-msg"><span class="spinner"></span>&nbsp; Загружаю…</div></div>
+
+  <footer>
+    Отметки хранятся в вашей Google-таблице и синхронизируются между устройствами.<br>
+    Чтобы добавить комнату или дело — впишите строку на лист «Настройки».
+  </footer>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-card">
+    <div class="modal-top">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" id="modal-close" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   НАСТРОЙКА: вставьте сюда ссылку веб-приложения Google
+   (получите её в инструкции, шаг «Опубликовать как веб-приложение»).
+   Должна выглядеть так:
+   https://script.google.com/macros/s/AKfyc.../exec
+   ============================================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbzFO8JL41_4AeHkaX5IK7jBDZUUUzZvUm4HjhiF350weXA_As-HK_Lc_0H8aEJJ6Y8mHA/exec";
+
+/* ПАРОЛЬ. Впишите здесь ровно то же слово, что и в скрипте (var SECRET).
+   Оставьте пустым "" только если и в скрипте пароль пустой. */
+const SECRET = "";
+
+/* ---------- вспомогательные ---------- */
+function localDateStr(d){
+  const p = n => String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+}
+function dayDiff(aStr,bStr){
+  const a=new Date(aStr+'T00:00:00'), b=new Date(bStr+'T00:00:00');
+  return Math.round((b-a)/86400000);
+}
+function pad2(n){return String(n).padStart(2,'0')}
+const CAT_TITLES = {
+  'комната':'Уборка по комнатам',
+  'хлеб':'Хлеб',
+  'глажка':'Бельё на глажку',
+  'стирка':'Стирка'
+};
+const CAT_ORDER = ['комната','хлеб','глажка','стирка'];
+function cap(s){return s? s.charAt(0).toUpperCase()+s.slice(1): s}
+
+/* ---------- состояние ---------- */
+let settings = [];
+let journal = [];
+let weekOffset = 0;
+
+/* ---------- сеть ---------- */
+async function fetchData(){
+  if(!API_URL){ document.getElementById('setup').style.display='block'; renderDemo(); return; }
+  try{
+    setStatus('<span class="spinner"></span> обновляю…');
+    const res = await fetch(API_URL + '?t=' + Date.now() + '&key=' + encodeURIComponent(SECRET));
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error||'ошибка данных');
+    settings = data.settings || [];
+    journal = data.journal || [];
+    render();
+    setStatus('обновлено ' + new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));
+  }catch(err){
+    setStatus('');
+    document.getElementById('app').innerHTML =
+      '<div class="center-msg">Не удалось связаться с таблицей.<br>' +
+      'Проверьте ссылку API_URL и доступ веб-приложения.<br><br>' +
+      '<button class="refresh" onclick="fetchData()">Повторить</button></div>';
+    console.error(err);
+  }
+}
+async function post(payload){
+  payload.key = SECRET;
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'}, // text/plain — чтобы не было CORS-preflight
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error||'ошибка записи');
+  if(data.journal) journal = data.journal;
+  return data;
+}
+
+/* ---------- логика статуса ---------- */
+function statusOf(task){
+  const entries = journal.filter(e=>e.id===task.id && e.ts);
+  if(!entries.length) return {never:true, due:true, done:false, days:null};
+  let lastTs = entries[0].ts;
+  for(const e of entries){ if(e.ts>lastTs) lastTs=e.ts; }
+  const days = dayDiff(localDateStr(new Date(lastTs)), localDateStr(new Date()));
+  const due = days >= (task.period||1);
+  return {never:false, due, done:!due, days, lastTs};
+}
+function statusText(task, st){
+  if(st.never) return 'ещё не отмечалось';
+  if(st.days===0) return task.category==='комната' ? 'убрано сегодня' : 'сделано сегодня';
+  const d = st.days;
+  const word = d + ' дн. назад';
+  return 'последний раз: ' + word;
+}
+
+/* ---------- рендер ---------- */
+function render(){
+  const app = document.getElementById('app');
+  if(!settings.length){
+    app.innerHTML = '<div class="center-msg">На листе «Настройки» пока нет дел.<br>Добавьте строки — и они появятся здесь.</div>';
+    return;
+  }
+  const today = localDateStr(new Date());
+  const due = settings.map(t=>({t, st:statusOf(t)})).filter(x=>x.st.due);
+
+  let html = '';
+
+  /* блок «на сегодня» */
+  html += '<div class="card today"><h2>На сегодня</h2>';
+  if(!due.length){
+    html += '<div class="empty"><b>Всё сделано.</b> На сегодня дел нет.</div>';
+  }else{
+    due.forEach(({t,st})=>{
+      html += '<div class="todo-item"><div class="body"><div class="name">'+esc(t.name)+'</div>'+
+        '<div class="sub">'+esc(sectionLabel(t))+' · '+esc(statusText(t,st))+'</div></div>'+
+        '<button class="btn-done" data-done="'+esc(t.id)+'">Готово</button></div>';
+    });
+  }
+  html += '</div>';
+
+  /* разделы по категориям */
+  const groups = groupByCategory(settings);
+  groups.forEach(g=>{
+    html += '<div class="card"><h2>'+esc(g.title)+'</h2>';
+    g.items.forEach(t=>{
+      const st = statusOf(t);
+      const cls = 'row' + (st.done?' done':'') + (st.due && !st.never?' is-due':'') + (st.never?' is-due':'');
+      html += '<div class="'+cls+'" data-toggle="'+esc(t.id)+'">'+
+        '<div class="box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>'+
+        '<div class="body"><div class="name">'+esc(t.name)+'</div>'+
+        '<div class="sub">'+esc(statusText(t,st))+'</div></div>'+
+      '</div>';
+    });
+    html += '</div>';
+  });
+
+  /* история за неделю */
+  html += '<div class="card week-card"><h2>История за неделю</h2><div id="weekwrap"></div></div>';
+
+  app.innerHTML = html;
+  renderWeekInto();
+  bind();
+}
+
+function sectionLabel(t){
+  return CAT_TITLES[t.category] || cap(t.category);
+}
+function groupByCategory(tasks){
+  const map = {};
+  tasks.forEach(t=>{ (map[t.category]=map[t.category]||[]).push(t); });
+  const keys = Object.keys(map).sort((a,b)=>{
+    const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib);
+  });
+  return keys.map(k=>({key:k, title:CAT_TITLES[k]||cap(k), items:map[k]}));
+}
+
+/* ---------- недельная сетка истории ---------- */
+const DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const CAT_ICON = {'комната':'🧹','хлеб':'🍞','глажка':'👔','стирка':'🧺'};
+const CAT_SHORT = {'комната':'Уборка','хлеб':'Хлеб','глажка':'Глажка','стирка':'Стирка'};
+
+function mondayOf(offset){
+  const d = new Date(); d.setHours(0,0,0,0);
+  const wd = (d.getDay()+6)%7;            // 0 = понедельник
+  d.setDate(d.getDate()-wd + offset*7);
+  return d;
+}
+function orderedCats(){
+  const present = [...new Set(settings.map(t=>t.category))];
+  return present.sort(function(a,b){
+    var ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib);
+  });
+}
+function cellCount(cat, dateStr){
+  var ids = new Set();
+  journal.forEach(function(e){
+    if(e.category===cat && e.ts && localDateStr(new Date(e.ts))===dateStr) ids.add(e.id);
+  });
+  return ids.size;
+}
+function fmtRange(a,b){
+  if(a.getMonth()===b.getMonth()) return a.getDate()+'–'+b.getDate()+' '+MONTHS[b.getMonth()];
+  return a.getDate()+' '+MONTHS[a.getMonth()]+' – '+b.getDate()+' '+MONTHS[b.getMonth()];
+}
+
+function renderWeekInto(){
+  var wrap = document.getElementById('weekwrap'); if(!wrap) return;
+  var monday = mondayOf(weekOffset);
+  var days = []; for(var i=0;i<7;i++){ var d=new Date(monday); d.setDate(d.getDate()+i); days.push(d); }
+  var todayStr = localDateStr(new Date());
+  var cats = orderedCats();
+
+  var h = '<div class="week-head">'+
+    '<button class="wnav" data-week="prev" aria-label="Прошлая неделя">‹</button>'+
+    '<div class="week-title">'+esc(fmtRange(days[0],days[6]))+(weekOffset===0?' · эта неделя':'')+'</div>'+
+    (weekOffset<0 ? '<button class="wnav" data-week="next" aria-label="Следующая неделя">›</button>'
+                  : '<span class="wnav dis">›</span>')+
+  '</div>';
+
+  h += '<div class="wgrid" style="grid-template-columns:86px repeat(7,1fr)">';
+  h += '<div></div>';
+  days.forEach(function(d){
+    var ds=localDateStr(d), today=ds===todayStr;
+    h += '<div class="wday'+(today?' today':'')+'" data-day="'+ds+'">'+
+         '<span class="wdow">'+DOW[(d.getDay()+6)%7]+'</span><span class="wnum">'+d.getDate()+'</span></div>';
+  });
+  cats.forEach(function(cat){
+    h += '<div class="wlabel" data-cat="'+esc(cat)+'"><span class="wico">'+(CAT_ICON[cat]||'•')+'</span>'+
+         '<span>'+esc(CAT_SHORT[cat]||cap(cat))+'</span></div>';
+    days.forEach(function(d){
+      var ds=localDateStr(d), today=ds===todayStr, n=cellCount(cat,ds);
+      var mark='';
+      if(n>0) mark = (cat==='комната' && n>1) ? '<span class="wcount">'+n+'</span>' : '<span class="wcheck">✓</span>';
+      h += '<div class="wcell'+(today?' today':'')+(n>0?' has':'')+'" data-cat="'+esc(cat)+'">'+mark+'</div>';
+    });
+  });
+  h += '</div>';
+  h += '<div class="week-hint">Нажмите на строку — отчёт по делу; на день сверху — что сделано в этот день.</div>';
+
+  wrap.innerHTML = h;
+  wrap.querySelectorAll('button[data-week]').forEach(function(el){
+    el.addEventListener('click', function(){ weekOffset += el.getAttribute('data-week')==='next'?1:-1; renderWeekInto(); });
+  });
+  wrap.querySelectorAll('[data-day]').forEach(function(el){
+    el.addEventListener('click', function(){ reportForDay(el.getAttribute('data-day')); });
+  });
+  wrap.querySelectorAll('[data-cat]').forEach(function(el){
+    el.addEventListener('click', function(){ reportForCategory(el.getAttribute('data-cat')); });
+  });
+}
+
+/* ---------- отчёты (по нажатию) ---------- */
+function count30(id){
+  var from = new Date(); from.setDate(from.getDate()-30);
+  var n=0; journal.forEach(function(e){ if(e.id===id && e.ts && new Date(e.ts)>=from) n++; });
+  return n;
+}
+function lastText(st){
+  if(st.never) return 'ещё не отмечалось';
+  if(st.days===0) return 'сегодня';
+  return st.days+' дн. назад';
+}
+function reportForCategory(cat){
+  var tasks = settings.filter(function(t){ return t.category===cat; });
+  if(!tasks.length){
+    var seen={}; journal.forEach(function(e){ if(e.category===cat && !seen[e.id]){ seen[e.id]={id:e.id,name:e.name,category:cat,period:1}; } });
+    tasks = Object.keys(seen).map(function(k){ return seen[k]; });
+  }
+  var b = '<div class="rep-list">';
+  tasks.forEach(function(t){
+    var st = statusOf(t);
+    b += '<div class="rep-row"><div class="rep-name">'+esc(t.name)+'</div>'+
+         '<div class="rep-meta"><span>последний раз: '+esc(lastText(st))+'</span>'+
+         '<span class="rep-badge">за 30 дней: '+count30(t.id)+'</span></div></div>';
+  });
+  b += '</div>';
+  b += recentList(function(e){ return e.category===cat; }, 14, 'Недавние отметки');
+  openModal((CAT_ICON[cat]||'')+' '+esc(CAT_TITLES[cat]||cap(cat)), b);
+}
+function reportForDay(dateStr){
+  var es = journal.filter(function(e){ return e.ts && localDateStr(new Date(e.ts))===dateStr; })
+                  .sort(function(a,b){ return a.ts.localeCompare(b.ts); });
+  var b;
+  if(!es.length){ b = '<div class="rep-empty">В этот день отметок нет.</div>'; }
+  else{
+    b = '<div class="rep-list">';
+    es.forEach(function(e){ var d=new Date(e.ts);
+      b += '<div class="rep-row"><div class="rep-name">'+esc(e.name)+'</div>'+
+           '<div class="rep-meta"><span>'+(CAT_ICON[e.category]||'')+' '+esc(CAT_SHORT[e.category]||e.category)+'</span>'+
+           '<span class="rep-badge">'+pad2(d.getHours())+':'+pad2(d.getMinutes())+'</span></div></div>';
+    });
+    b += '</div>';
+  }
+  openModal(esc(fullDay(dateStr)), b);
+}
+function recentList(filterFn, limit, heading){
+  var es = journal.filter(function(e){ return e.ts && filterFn(e); })
+                  .sort(function(a,b){ return b.ts.localeCompare(a.ts); }).slice(0,limit);
+  if(!es.length) return '';
+  var h = '<div class="rep-heading">'+esc(heading)+'</div>';
+  es.forEach(function(e){ var d=new Date(e.ts);
+    h += '<div class="rep-rentry"><span class="t">'+esc(shortDay(d))+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())+'</span>'+
+         '<span class="n">'+esc(e.name)+'</span></div>';
+  });
+  return h;
+}
+function fullDay(dateStr){
+  var d = new Date(dateStr+'T00:00:00');
+  var today = localDateStr(new Date());
+  var y = new Date(); y.setDate(y.getDate()-1);
+  var pre = '';
+  if(dateStr===today) pre='Сегодня, ';
+  else if(dateStr===localDateStr(y)) pre='Вчера, ';
+  return pre + d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+}
+function shortDay(d){ return d.getDate()+' '+MONTHS[d.getMonth()]; }
+
+function openModal(titleHtml, bodyHtml){
+  document.getElementById('modal-title').innerHTML = titleHtml;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+
+/* ---------- события ---------- */
+function bind(){
+  document.querySelectorAll('[data-toggle]').forEach(el=>{
+    el.addEventListener('click', ()=> onToggle(el.getAttribute('data-toggle')));
+  });
+  document.querySelectorAll('[data-done]').forEach(el=>{
+    el.addEventListener('click', ()=> onDone(el.getAttribute('data-done')));
+  });
+}
+
+async function onToggle(id){
+  const task = settings.find(t=>t.id===id); if(!task) return;
+  const st = statusOf(task);
+  const action = st.done ? 'undo' : 'done';
+  await doAction({action, id:task.id, name:task.name, category:task.category},
+                 action==='done'?'Отмечено':'Отметка убрана');
+}
+async function onDone(id){
+  const task = settings.find(t=>t.id===id); if(!task) return;
+  await doAction({action:'done', id:task.id, name:task.name, category:task.category},'Отмечено');
+}
+async function doAction(payload, okMsg){
+  if(!API_URL){ toast('Сначала вставьте ссылку API_URL'); return; }
+  const app = document.getElementById('app'); app.classList.add('loading');
+  try{
+    await post(payload);
+    render();
+    toast(okMsg);
+  }catch(err){
+    toast('Не удалось сохранить');
+    console.error(err);
+  }finally{
+    app.classList.remove('loading');
+  }
+}
+
+/* ---------- утилиты ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function setStatus(html){document.getElementById('status-line').innerHTML=html||'&nbsp;'}
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ---------- демо-режим (когда ссылка ещё не вставлена) ---------- */
+function renderDemo(){
+  settings = [
+    {id:'room_amrita',name:'Комната Амрита',category:'комната',period:1},
+    {id:'room_my',name:'Моя комната',category:'комната',period:1},
+    {id:'room_anti',name:'Комната Анти',category:'комната',period:1},
+    {id:'room_babushka',name:'Комната бабушки',category:'комната',period:1},
+    {id:'room_gostinaya',name:'Гостиная',category:'комната',period:1},
+    {id:'bread',name:'Заказ хлеба',category:'хлеб',period:7},
+    {id:'ironing',name:'Бельё на глажку',category:'глажка',period:4},
+    {id:'laundry',name:'Стирка',category:'стирка',period:4},
+  ];
+  const iso = (daysAgo)=>{const d=new Date();d.setDate(d.getDate()-daysAgo);return d.toISOString();};
+  journal = [
+    {id:'room_my',name:'Моя комната',category:'комната',ts:iso(0)},
+    {id:'room_gostinaya',name:'Гостиная',category:'комната',ts:iso(0)},
+    {id:'bread',name:'Заказ хлеба',category:'хлеб',ts:iso(8)},
+    {id:'ironing',name:'Бельё на глажку',category:'глажка',ts:iso(5)},
+    {id:'laundry',name:'Стирка',category:'стирка',ts:iso(2)},
+    {id:'room_amrita',name:'Комната Амрита',category:'комната',ts:iso(1)},
+  ];
+  render();
+  setStatus('демо-режим');
+}
+
+/* ---------- старт ---------- */
+document.getElementById('today').textContent =
+  new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('refresh').addEventListener('click', fetchData);
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && API_URL) fetchData(); });
+fetchData();
+</script>
+</body>
+</html>
