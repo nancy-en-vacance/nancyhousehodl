@@ -139,6 +139,31 @@
   .hist-entry .c{color:var(--muted);font-size:12px}
   .hist-empty{padding:4px 18px 18px;color:var(--muted);font-size:14px}
 
+  /* панель-переключатель категорий (горизонтальная прокрутка) */
+  .cattabs{
+    display:flex;gap:4px;overflow-x:auto;padding:2px 2px 12px;margin-bottom:4px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .cattabs::-webkit-scrollbar{display:none}
+  .ctab{
+    flex:0 0 auto;border:none;background:none;cursor:pointer;padding:2px 0;
+    display:flex;flex-direction:column;align-items:center;gap:5px;width:64px;
+  }
+  .ctab .cico{
+    width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;
+    background:var(--card);border:1px solid var(--line);transition:.15s;
+  }
+  .ctab .clbl{
+    font-size:12px;color:var(--muted);font-weight:600;max-width:62px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .ctab:active .cico{transform:scale(.94)}
+  .ctab.on .cico{
+    background:var(--accent);border-color:var(--accent);
+    box-shadow:0 5px 14px rgba(124,148,115,.38);
+  }
+  .ctab.on .clbl{color:var(--accent-ink);font-weight:700}
+
   /* блок «Все дела по разделам» (свёрнутый) */
   details.allcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
     box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
@@ -251,7 +276,8 @@
 
   <footer>
     Отметки хранятся в вашей Google-таблице и синхронизируются между устройствами.<br>
-    Чтобы добавить комнату или дело — впишите строку на лист «Настройки».
+    Чтобы добавить комнату или дело — впишите строку на лист «Настройки».<br>
+    <span style="opacity:.6">версия 5 · без «На сегодня»</span>
   </footer>
 </div>
 
@@ -280,6 +306,11 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzFO8JL41_4AeHkaX5IK7jB
    Оставьте пустым "" только если и в скрипте пароль пустой. */
 const SECRET = "chuchu";
 
+/* Показывать блок «На сегодня» сверху.
+   Пока расписаний почти нет — держим false (блок скрыт).
+   Когда введёшь периодичности по делам — поставь true, и блок вернётся. */
+const SHOW_TODAY = false;
+
 /* ---------- вспомогательные ---------- */
 function localDateStr(d){
   const p = n => String(n).padStart(2,'0');
@@ -303,7 +334,8 @@ function cap(s){return s? s.charAt(0).toUpperCase()+s.slice(1): s}
 let settings = [];
 let journal = [];
 let weekOffset = 0;
-let allOpen = false;   // раскрыт ли блок «Все дела по разделам»
+let allOpen = false;   // (устар.) раскрыт ли старый блок «Все дела»
+let activeCat = 'all'; // активная вкладка категорий: 'all' или ключ категории
 
 /* ---------- сеть ---------- */
 async function fetchData(){
@@ -369,46 +401,80 @@ function render(){
 
   let html = '';
 
-  /* блок «на сегодня» */
-  html += '<div class="card today"><h2>На сегодня</h2>';
-  if(!due.length){
-    html += '<div class="empty"><b>Всё сделано.</b> На сегодня дел нет.</div>';
-  }else{
-    due.forEach(({t,st})=>{
-      html += '<div class="todo-item"><div class="body"><div class="name">'+esc(t.name)+'</div>'+
-        '<div class="sub">'+esc(sectionLabel(t))+' · '+esc(statusText(t,st))+'</div></div>'+
-        '<button class="btn-done" data-done="'+esc(t.id)+'">Готово</button></div>';
-    });
-  }
-  html += '</div>';
-
-  /* все дела по разделам — свёрнуто в раскрывающийся блок */
-  const groups = groupByCategory(settings);
-  const totalTasks = settings.length;
-  html += '<details class="allcard" id="alldetails"'+(allOpen?' open':'')+'>'+
-    '<summary><span>Все дела по разделам<span class="allcount">'+totalTasks+'</span></span>'+
-    '<span class="chev">⌄</span></summary><div class="allbody">';
-  groups.forEach(g=>{
-    html += '<div class="allsection"><h2>'+esc(g.title)+'</h2>';
-    g.items.forEach(t=>{
-      const st = statusOf(t);
-      const cls = 'row' + (st.done?' done':'') + (st.due && !st.never?' is-due':'') + (st.never?' is-due':'');
-      html += '<div class="'+cls+'" data-toggle="'+esc(t.id)+'" role="button" tabindex="0" aria-pressed="'+(st.done?'true':'false')+'" aria-label="'+esc(t.name)+', '+esc(statusText(t,st))+'">'+
-        '<div class="box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>'+
-        '<div class="body"><div class="name">'+esc(t.name)+'</div>'+
-        '<div class="sub">'+esc(statusText(t,st))+'</div></div>'+
-      '</div>';
-    });
+  /* блок «на сегодня» (показывается только при SHOW_TODAY) */
+  if(SHOW_TODAY){
+    html += '<div class="card today"><h2>На сегодня</h2>';
+    if(!due.length){
+      html += '<div class="empty"><b>Всё сделано.</b> На сегодня дел нет.</div>';
+    }else{
+      due.forEach(({t,st})=>{
+        html += '<div class="todo-item"><div class="body"><div class="name">'+esc(t.name)+'</div>'+
+          '<div class="sub">'+esc(sectionLabel(t))+' · '+esc(statusText(t,st))+'</div></div>'+
+          '<button class="btn-done" data-done="'+esc(t.id)+'">Готово</button></div>';
+      });
+    }
     html += '</div>';
-  });
-  html += '</div></details>';
+  }
+
+  /* панель-переключатель категорий + список (фильтруется вкладкой) */
+  html += '<div class="cattabs" id="cattabs"></div>';
+  html += '<div id="catlist"></div>';
 
   /* история за неделю */
   html += '<div class="card week-card"><h2>История за неделю</h2><div id="weekwrap"></div></div>';
 
   app.innerHTML = html;
+  renderTabs();
+  renderCatList();
   renderWeekInto();
-  bind();
+  bindDone();
+}
+
+/* ---------- панель вкладок категорий ---------- */
+function renderTabs(){
+  const bar = document.getElementById('cattabs'); if(!bar) return;
+  const cats = orderedCats();
+  let h = '<button class="ctab'+(activeCat==='all'?' on':'')+'" data-cat-tab="all">'+
+          '<span class="cico">🏠</span><span class="clbl">Все</span></button>';
+  cats.forEach(function(c){
+    h += '<button class="ctab'+(activeCat===c?' on':'')+'" data-cat-tab="'+esc(c)+'">'+
+         '<span class="cico">'+catIcon(c)+'</span><span class="clbl">'+esc(CAT_SHORT[c]||cap(c))+'</span></button>';
+  });
+  bar.innerHTML = h;
+  bar.querySelectorAll('[data-cat-tab]').forEach(function(el){
+    el.addEventListener('click', function(){
+      activeCat = el.getAttribute('data-cat-tab');
+      renderTabs(); renderCatList();
+    });
+  });
+}
+
+/* ---------- список дел по активной вкладке ---------- */
+function renderCatList(){
+  const wrap = document.getElementById('catlist'); if(!wrap) return;
+  let groups = groupByCategory(settings);
+  if(activeCat!=='all') groups = groups.filter(function(g){ return g.key===activeCat; });
+  let h = '';
+  if(!groups.length){
+    h = '<div class="center-msg">В этой категории пока нет дел.</div>';
+  }
+  groups.forEach(function(g){
+    h += '<div class="card"><h2>'+esc(g.title)+'</h2>';
+    g.items.forEach(function(t){
+      const st = statusOf(t);
+      const cls = 'row' + (st.done?' done':'') + (st.due?' is-due':'');
+      h += '<div class="'+cls+'" data-toggle="'+esc(t.id)+'" role="button" tabindex="0" aria-pressed="'+(st.done?'true':'false')+'" aria-label="'+esc(t.name)+', '+esc(statusText(t,st))+'">'+
+        '<div class="box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>'+
+        '<div class="body"><div class="name">'+esc(t.name)+'</div>'+
+        '<div class="sub">'+esc(statusText(t,st))+'</div></div>'+
+      '</div>';
+    });
+    h += '</div>';
+  });
+  wrap.innerHTML = h;
+  wrap.querySelectorAll('[data-toggle]').forEach(function(el){
+    el.addEventListener('click', function(){ onToggle(el.getAttribute('data-toggle')); });
+  });
 }
 
 function sectionLabel(t){
@@ -577,12 +643,7 @@ function openModal(titleHtml, bodyHtml){
 function closeModal(){ document.getElementById('modal').classList.remove('show'); }
 
 /* ---------- события ---------- */
-function bind(){
-  const ad = document.getElementById('alldetails');
-  if(ad) ad.addEventListener('toggle', ()=>{ allOpen = ad.open; });
-  document.querySelectorAll('[data-toggle]').forEach(el=>{
-    el.addEventListener('click', ()=> onToggle(el.getAttribute('data-toggle')));
-  });
+function bindDone(){
   document.querySelectorAll('[data-done]').forEach(el=>{
     el.addEventListener('click', ()=> onDone(el.getAttribute('data-done')));
   });
