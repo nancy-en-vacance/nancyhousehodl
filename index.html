@@ -13,7 +13,7 @@
     --bg2:#efe7da;
     --card:#fffdf9;
     --ink:#3f382f;
-    --muted:#938a7b;
+    --muted:#7a7163;
     --line:#e7ddcd;
     --accent:#7c9473;      /* мягкий шалфейный */
     --accent-ink:#4f6549;
@@ -44,7 +44,7 @@
   header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
   header.top h1{
     font-family:'Pangolin','Century Gothic','Futura','Segoe UI',sans-serif;
-    font-size:30px;font-weight:600;margin:0;letter-spacing:.4px;color:var(--accent-ink);
+    font-size:32px;font-weight:400;margin:0;letter-spacing:.2px;color:var(--accent-ink);
   }
   header.top .date{color:var(--muted);font-size:14px;white-space:nowrap}
 
@@ -139,6 +139,27 @@
   .hist-entry .c{color:var(--muted);font-size:12px}
   .hist-empty{padding:4px 18px 18px;color:var(--muted);font-size:14px}
 
+  /* блок «Все дела по разделам» (свёрнутый) */
+  details.allcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+  details.allcard > summary{
+    list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;font-size:15px;color:var(--ink);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  details.allcard > summary::-webkit-details-marker{display:none}
+  details.allcard > summary .allcount{
+    display:inline-grid;place-items:center;min-width:22px;height:22px;margin-left:8px;padding:0 6px;
+    background:#eef3e9;color:var(--accent-ink);border-radius:20px;font-size:12px;font-weight:700;
+  }
+  details.allcard > summary .chev{color:var(--muted);transition:transform .2s;font-size:18px;line-height:1}
+  details.allcard[open] > summary .chev{transform:rotate(180deg)}
+  .allbody{padding:0 6px 6px}
+  .allsection + .allsection{border-top:1px solid var(--line)}
+  .allsection > h2{
+    font-size:14px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:12px 14px 6px;font-weight:700;
+  }
+
   footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:22px;line-height:1.6}
 
   .toast{
@@ -202,6 +223,11 @@
   .rep-rentry:first-child{border-top:none}
   .rep-rentry .t{color:var(--muted);flex:0 0 96px;font-variant-numeric:tabular-nums}
   .rep-empty{color:var(--muted);padding:14px 2px;font-size:14.5px}
+
+  /* доступность: видимый фокус для клавиатуры */
+  [role="button"]:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{
+    outline:2px solid var(--accent-ink);outline-offset:2px;border-radius:12px;
+  }
 </style>
 </head>
 <body>
@@ -252,7 +278,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzFO8JL41_4AeHkaX5IK7jB
 
 /* ПАРОЛЬ. Впишите здесь ровно то же слово, что и в скрипте (var SECRET).
    Оставьте пустым "" только если и в скрипте пароль пустой. */
-const SECRET = "chuchu";
+const SECRET = "";
 
 /* ---------- вспомогательные ---------- */
 function localDateStr(d){
@@ -266,17 +292,18 @@ function dayDiff(aStr,bStr){
 function pad2(n){return String(n).padStart(2,'0')}
 const CAT_TITLES = {
   'комната':'Уборка по комнатам',
-  'хлеб':'Хлеб',
+  'закуп':'Закупки',
   'глажка':'Бельё на глажку',
   'стирка':'Стирка'
 };
-const CAT_ORDER = ['комната','хлеб','глажка','стирка'];
+const CAT_ORDER = ['комната','закуп','глажка','стирка'];
 function cap(s){return s? s.charAt(0).toUpperCase()+s.slice(1): s}
 
 /* ---------- состояние ---------- */
 let settings = [];
 let journal = [];
 let weekOffset = 0;
+let allOpen = false;   // раскрыт ли блок «Все дела по разделам»
 
 /* ---------- сеть ---------- */
 async function fetchData(){
@@ -355,14 +382,18 @@ function render(){
   }
   html += '</div>';
 
-  /* разделы по категориям */
+  /* все дела по разделам — свёрнуто в раскрывающийся блок */
   const groups = groupByCategory(settings);
+  const totalTasks = settings.length;
+  html += '<details class="allcard" id="alldetails"'+(allOpen?' open':'')+'>'+
+    '<summary><span>Все дела по разделам<span class="allcount">'+totalTasks+'</span></span>'+
+    '<span class="chev">⌄</span></summary><div class="allbody">';
   groups.forEach(g=>{
-    html += '<div class="card"><h2>'+esc(g.title)+'</h2>';
+    html += '<div class="allsection"><h2>'+esc(g.title)+'</h2>';
     g.items.forEach(t=>{
       const st = statusOf(t);
       const cls = 'row' + (st.done?' done':'') + (st.due && !st.never?' is-due':'') + (st.never?' is-due':'');
-      html += '<div class="'+cls+'" data-toggle="'+esc(t.id)+'">'+
+      html += '<div class="'+cls+'" data-toggle="'+esc(t.id)+'" role="button" tabindex="0" aria-pressed="'+(st.done?'true':'false')+'" aria-label="'+esc(t.name)+', '+esc(statusText(t,st))+'">'+
         '<div class="box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>'+
         '<div class="body"><div class="name">'+esc(t.name)+'</div>'+
         '<div class="sub">'+esc(statusText(t,st))+'</div></div>'+
@@ -370,6 +401,7 @@ function render(){
     });
     html += '</div>';
   });
+  html += '</div></details>';
 
   /* история за неделю */
   html += '<div class="card week-card"><h2>История за неделю</h2><div id="weekwrap"></div></div>';
@@ -395,8 +427,8 @@ function groupByCategory(tasks){
 /* ---------- недельная сетка истории ---------- */
 const DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-const CAT_ICON = {'уборка':'🧹','закуп':'🥕','глажка':'👔','постирушки':'🧺'};
-const CAT_SHORT = {'комната':'Уборка','хлеб':'Хлеб','глажка':'Глажка','стирка':'Стирка'};
+const CAT_ICON = {'комната':'🧹','закуп':'🥕','глажка':'👔','стирка':'🧺'};
+const CAT_SHORT = {'комната':'Уборка','закуп':'Закуп','глажка':'Глажка','стирка':'Стирка'};
 
 function mondayOf(offset){
   const d = new Date(); d.setHours(0,0,0,0);
@@ -441,11 +473,11 @@ function renderWeekInto(){
   h += '<div></div>';
   days.forEach(function(d){
     var ds=localDateStr(d), today=ds===todayStr;
-    h += '<div class="wday'+(today?' today':'')+'" data-day="'+ds+'">'+
+    h += '<div class="wday'+(today?' today':'')+'" data-day="'+ds+'" role="button" tabindex="0" aria-label="Отчёт за '+esc(fullDay(ds))+'">'+
          '<span class="wdow">'+DOW[(d.getDay()+6)%7]+'</span><span class="wnum">'+d.getDate()+'</span></div>';
   });
   cats.forEach(function(cat){
-    h += '<div class="wlabel" data-cat="'+esc(cat)+'"><span class="wico">'+(CAT_ICON[cat]||'•')+'</span>'+
+    h += '<div class="wlabel" data-cat="'+esc(cat)+'" role="button" tabindex="0" aria-label="Отчёт: '+esc(CAT_SHORT[cat]||cap(cat))+'"><span class="wico">'+(CAT_ICON[cat]||'•')+'</span>'+
          '<span>'+esc(CAT_SHORT[cat]||cap(cat))+'</span></div>';
     days.forEach(function(d){
       var ds=localDateStr(d), today=ds===todayStr, n=cellCount(cat,ds);
@@ -544,6 +576,8 @@ function closeModal(){ document.getElementById('modal').classList.remove('show')
 
 /* ---------- события ---------- */
 function bind(){
+  const ad = document.getElementById('alldetails');
+  if(ad) ad.addEventListener('toggle', ()=>{ allOpen = ad.open; });
   document.querySelectorAll('[data-toggle]').forEach(el=>{
     el.addEventListener('click', ()=> onToggle(el.getAttribute('data-toggle')));
   });
@@ -595,7 +629,7 @@ function renderDemo(){
     {id:'room_anti',name:'Комната Анти',category:'комната',period:1},
     {id:'room_babushka',name:'Комната бабушки',category:'комната',period:1},
     {id:'room_gostinaya',name:'Гостиная',category:'комната',period:1},
-    {id:'bread',name:'Заказ хлеба',category:'хлеб',period:7},
+    {id:'bread',name:'Заказ хлеба',category:'закуп',period:7},
     {id:'ironing',name:'Бельё на глажку',category:'глажка',period:4},
     {id:'laundry',name:'Стирка',category:'стирка',period:4},
   ];
@@ -603,7 +637,7 @@ function renderDemo(){
   journal = [
     {id:'room_my',name:'Моя комната',category:'комната',ts:iso(0)},
     {id:'room_gostinaya',name:'Гостиная',category:'комната',ts:iso(0)},
-    {id:'bread',name:'Заказ хлеба',category:'хлеб',ts:iso(8)},
+    {id:'bread',name:'Заказ хлеба',category:'закуп',ts:iso(8)},
     {id:'ironing',name:'Бельё на глажку',category:'глажка',ts:iso(5)},
     {id:'laundry',name:'Стирка',category:'стирка',ts:iso(2)},
     {id:'room_amrita',name:'Комната Амрита',category:'комната',ts:iso(1)},
@@ -619,6 +653,14 @@ document.getElementById('refresh').addEventListener('click', fetchData);
 document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+// Enter / Пробел активируют кликабельные строки (role="button") с клавиатуры
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter' && e.key!==' ' && e.key!=='Spacebar') return;
+  const el = document.activeElement;
+  if(el && el.getAttribute && el.getAttribute('role')==='button' && el.tagName!=='BUTTON'){
+    e.preventDefault(); el.click();
+  }
+});
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && API_URL) fetchData(); });
 fetchData();
 </script>
